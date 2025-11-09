@@ -1,14 +1,13 @@
 
-import React, { createContext, useContext, useState, useEffect, type ReactNode, type FC } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { ReactNode, FC } from 'react';
 import { initialResumeData } from '../data/initialData';
-// FIX: Import new types for multi-document store
 import type { ResumeStore, ResumeData, ListSectionKeys, ListItem, Document, Theme, SectionKeys, CanvasBlock } from '../types';
 import { produce } from 'immer';
 import { set } from 'lodash';
 
 const ResumeContext = createContext<ResumeStore | undefined>(undefined);
 
-// FIX: Default theme and sections for new documents
 const defaultTheme: Theme = {
     colors: {
         primary: '#1e293b',
@@ -290,12 +289,13 @@ export const ResumeProvider: FC<{ children: ReactNode }> = ({ children }) => {
     bringCanvasBlockForward,
   };
 
-  // FIX: Replaced JSX with React.createElement to fix parsing error in a .ts file.
-  // JSX syntax is not allowed in files with a .ts extension.
-  return React.createElement(ResumeContext.Provider, { value: value }, children);
+  return (
+    <ResumeContext.Provider value={value}>
+      {children}
+    </ResumeContext.Provider>
+  );
 };
 
-// FIX: Renamed hook to useResumeStore to match usage in components.
 export const useResumeStore = (): ResumeStore => {
   const context = useContext(ResumeContext);
   if (!context) {

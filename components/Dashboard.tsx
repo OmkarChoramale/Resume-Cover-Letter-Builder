@@ -4,10 +4,6 @@ import { useResumeStore } from '../hooks/useResumeStore';
 import type { Document } from '../types';
 import { motion, type Variants } from 'framer-motion';
 
-interface DashboardProps {
-    onSelectDocument: () => void;
-}
-
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -25,17 +21,15 @@ const itemVariants: Variants = {
 };
 
 
-const Dashboard = ({ onSelectDocument }: DashboardProps) => {
+const Dashboard = () => {
     const store = useResumeStore();
     
     const handleCreateNew = (type: 'resume' | 'cover-letter') => {
         store.createNewDocument(type, type === 'resume' ? 'canvas' : 'modern-cl');
-        onSelectDocument();
     };
     
     const handleSelect = (id: string) => {
         store.selectDocument(id);
-        onSelectDocument();
     };
     
     return (
@@ -121,7 +115,14 @@ const NewDocumentCard = ({ title, description, icon: Icon, onClick }: { title: s
     </motion.button>
 );
 
-const DocumentListItem = ({ doc, onSelect, onDelete }: { doc: Document, onSelect: (id: string) => void, onDelete: (id: string) => void }) => (
+// FIX: Define props interface for DocumentListItem to fix TypeScript error with `key` prop.
+interface DocumentListItemProps {
+    doc: Document;
+    onSelect: (id: string) => void;
+    onDelete: (id: string) => void;
+}
+
+const DocumentListItem: FC<DocumentListItemProps> = ({ doc, onSelect, onDelete }) => (
     <motion.li variants={itemVariants} className="flex items-center justify-between p-4 bg-black/40 hover:bg-black/50 border border-[var(--border-color)] rounded-xl shadow-md transition-all hover:border-[var(--accent)]/50">
         <div className="flex items-center">
              <div className="mr-4 text-cyan-400">{doc.type === 'resume' ? <ResumeIcon className="w-6 h-6" /> : <CoverLetterIcon className="w-6 h-6" />}</div>

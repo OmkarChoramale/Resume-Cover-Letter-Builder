@@ -177,7 +177,7 @@ export interface ResumeStore {
   activeDocumentId: string | null;
   activeDocument: Document | null;
   documentType: 'resume' | 'cover-letter' | null;
-  selectDocument: (id: string) => void;
+  selectDocument: (id: string | null) => void;
   createNewDocument: (type: 'resume' | 'cover-letter', templateId: string) => void;
   deleteDocument: (id: string) => void;
   updateTemplate: (templateId: string) => void;

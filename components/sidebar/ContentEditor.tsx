@@ -54,6 +54,10 @@ const ContentEditor: FC = () => {
             <ListSection section="education" title="Education" />
             <ListSection section="projects" title="Projects" />
             <ListSection section="skills" title="Skills" />
+            <ListSection section="certificates" title="Certificates" />
+            <ListSection section="achievements" title="Achievements" />
+            <ListSection section="languages" title="Languages" />
+            <ListSection section="hobbies" title="Hobbies" />
         </div>
     );
 };

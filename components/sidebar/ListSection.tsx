@@ -1,7 +1,6 @@
 import React, { type FC } from 'react';
-// FIX: Renamed useResumeData to useResumeStore
 import { useResumeStore } from '../../hooks/useResumeStore';
-import type { ListSectionKeys, ListItem, Experience, Education, Project, Skill } from '../../types';
+import type { ListSectionKeys, ListItem, Experience, Education, Project, Skill, Certificate, Achievement, Language, Hobby } from '../../types';
 import Accordion from '../ui/Accordion';
 import Input from '../ui/Input';
 import Textarea from '../ui/Textarea';
@@ -44,6 +43,29 @@ const ListSection: FC<{ section: ListSectionKeys; title: string; }> = ({ section
             }
             case 'skills':
                 return <Input label="Skill" value={(item as Skill).value} onChange={e => updateListItem(section, item.id, 'value', e.target.value)} />;
+            case 'certificates': {
+                const cert = item as Certificate;
+                return <>
+                    <Input label="Certificate Name" value={cert.name} onChange={e => updateListItem(section, cert.id, 'name', e.target.value)} />
+                    <Input label="Issuer" value={cert.issuer} onChange={e => updateListItem(section, cert.id, 'issuer', e.target.value)} />
+                    <Input label="Date" value={cert.date} onChange={e => updateListItem(section, cert.id, 'date', e.target.value)} />
+                </>;
+            }
+            case 'achievements': {
+                const ach = item as Achievement;
+                return <Textarea label="Achievement" value={ach.description} onChange={e => updateListItem(section, ach.id, 'description', e.target.value)} rows={3} />;
+            }
+            case 'languages': {
+                const lang = item as Language;
+                return <>
+                    <Input label="Language" value={lang.name} onChange={e => updateListItem(section, lang.id, 'name', e.target.value)} />
+                    <Input label="Proficiency" value={lang.proficiency} onChange={e => updateListItem(section, lang.id, 'proficiency', e.target.value)} />
+                </>;
+            }
+            case 'hobbies': {
+                const hobby = item as Hobby;
+                return <Input label="Hobby" value={hobby.name} onChange={e => updateListItem(section, hobby.id, 'name', e.target.value)} />;
+            }
             default:
                 return null;
         }
