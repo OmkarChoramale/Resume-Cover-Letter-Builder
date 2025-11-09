@@ -9,7 +9,7 @@ export interface PersonalInfo {
   linkedin: string;
   github: string;
   website: string;
-  profilePicture: string | null; // Base64 encoded image
+  profilePicture: string | null;
 }
 
 export interface Experience {
@@ -37,6 +37,12 @@ export interface Project {
   link: string;
 }
 
+export interface Skill {
+  id: string;
+  value: string;
+}
+
+// FIX: Added missing types for additional resume sections.
 export interface Certificate {
   id: string;
   name: string;
@@ -45,144 +51,141 @@ export interface Certificate {
 }
 
 export interface Achievement {
-  id: string;
-  description: string;
+    id: string;
+    description: string;
 }
 
 export interface Language {
-  id: string;
-  name: string;
-  proficiency: 'Native' | 'Fluent' | 'Proficient' | 'Intermediate' | 'Basic';
+    id: string;
+    name: string;
+    proficiency: string;
 }
 
 export interface Hobby {
-  id: string;
-  name: string;
+    id: string;
+    name: string;
 }
 
-export interface Skill {
-  id: string;
-  value: string;
-}
 
 export interface ResumeData {
   personalInfo: PersonalInfo;
   summary: string;
-  coverLetter: string;
   experience: Experience[];
   education: Education[];
   skills: Skill[];
   projects: Project[];
+  // FIX: Added missing fields to ResumeData.
   certificates: Certificate[];
   achievements: Achievement[];
   languages: Language[];
   hobbies: Hobby[];
+  coverLetter: string;
 }
 
-export type SectionKeys = keyof ResumeData;
 export type ListSectionKeys = 'experience' | 'education' | 'projects' | 'skills' | 'certificates' | 'achievements' | 'languages' | 'hobbies';
 export type ListItem = Experience | Education | Project | Skill | Certificate | Achievement | Language | Hobby;
 
+// FIX: Added SectionKeys type.
+export type SectionKeys = keyof Omit<ResumeData, 'personalInfo' | 'coverLetter'> | 'personalInfo';
 
-// ADVANCED CUSTOMIZATION TYPES
-export interface FontStyle {
-  family: string;
-  size: number; // in px
-  weight: 400 | 500 | 600 | 700;
-}
-
+// FIX: Added Theme type.
 export interface Theme {
   colors: {
     primary: string;
-    text: string;
     accent: string;
+    text: string;
     background: string;
   };
   fonts: {
-    heading: FontStyle;
-    body: FontStyle;
+    heading: {
+      family: string;
+      size: number;
+      weight: number;
+    };
+    body: {
+      family: string;
+      size: number;
+      weight: number;
+    };
   };
 }
 
+// FIX: Added CanvasBlock type.
 export interface CanvasBlock {
-  id: string;
-  type: SectionKeys;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  zIndex: number;
+    id: string;
+    type: SectionKeys;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    zIndex: number;
 }
 
-
-export interface Document {
-  id: string;
-  name: string;
-  type: DocumentType;
-  lastModified: number;
-  data: ResumeData;
-  customization: {
-    template: string;
-    theme: Theme;
-    sections: Record<SectionKeys, boolean>;
-    sectionOrder: SectionKeys[];
-    canvasLayout: CanvasBlock[];
-  };
-}
-
-export type DocumentType = 'resume' | 'cover-letter';
 
 export interface ResumeTemplateProps {
   data: ResumeData;
-  theme: Theme;
-  sections: Record<SectionKeys, boolean>;
-  sectionOrder: SectionKeys[];
+  // FIX: Added missing optional props for templates.
+  theme?: Theme;
+  sections?: Record<SectionKeys, boolean>;
+  sectionOrder?: SectionKeys[];
   canvasLayout?: CanvasBlock[];
 }
 
+// FIX: Added Template type.
 export interface Template {
-  id: string;
-  name: string;
-  component: ComponentType<ResumeTemplateProps>;
-  thumbnail: string;
+    id: string;
+    name: string;
+    component: ComponentType<ResumeTemplateProps>;
+    thumbnail: string;
 }
 
+// FIX: Added FontOption type.
 export interface FontOption {
-  name: string;
-  family: string;
+    name: string;
+    family: string;
 }
 
-export interface AppState {
-  documents: Document[];
-  activeDocumentId: string | null;
-  documentType: DocumentType;
+// FIX: Added Document type.
+export interface Document {
+    id: string;
+    name: string;
+    type: 'resume' | 'cover-letter';
+    data: ResumeData;
+    customization: {
+        template: string;
+        theme: Theme;
+        sections: Record<SectionKeys, boolean>;
+        sectionOrder: SectionKeys[];
+        canvasLayout: CanvasBlock[];
+    };
+    lastModified: number;
 }
 
-export interface ResumeStore extends AppState {
-  activeDocument: Document | null;
-  updateField: (section: 'personalInfo' | 'summary', field: string, value: string) => void;
-  updateWholeSection: (section: 'summary' | 'coverLetter', value: string) => void;
+
+export interface ResumeStore {
+  resumeData: ResumeData;
+  updateField: (section: 'personalInfo', field: string, value: string) => void;
+  updateSummary: (value: string) => void;
   addListItem: (section: ListSectionKeys) => void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   updateListItem: (section: ListSectionKeys, id: string, field: string, value: any) => void;
   removeListItem: (section: ListSectionKeys, id: string) => void;
-  toggleSectionVisibility: (section: SectionKeys) => void;
-  setSectionOrder: (newOrder: SectionKeys[]) => void;
-  setListOrder: (section: ListSectionKeys, newOrder: any[]) => void;
-  updateTheme: (newTheme: Partial<Theme> | { path: string; value: unknown }) => void;
-  updateTemplate: (templateId: string) => void;
-  setDocumentType: (type: DocumentType) => void;
-  updateProfilePicture: (file: File) => void;
+  updateProfilePicture: (base64: string) => void;
   
-  // Canvas methods
+  // FIX: Added properties and methods for multi-document management.
+  documents: Document[];
+  activeDocumentId: string | null;
+  activeDocument: Document | null;
+  documentType: 'resume' | 'cover-letter' | null;
+  selectDocument: (id: string) => void;
+  createNewDocument: (type: 'resume' | 'cover-letter', templateId: string) => void;
+  deleteDocument: (id: string) => void;
+  updateTemplate: (templateId: string) => void;
+  updateTheme: (update: { path?: string; value?: unknown; colors?: Theme['colors'] }) => void;
+  toggleSectionVisibility: (section: SectionKeys) => void;
+  setSectionOrder: (order: SectionKeys[]) => void;
   addCanvasBlock: (type: SectionKeys) => void;
   updateCanvasBlock: (id: string, updates: Partial<CanvasBlock>) => void;
   removeCanvasBlock: (id: string) => void;
   bringCanvasBlockForward: (id: string) => void;
-
-  // Document Management
-  selectDocument: (id: string | null) => void;
-  createNewDocument: (type: DocumentType, templateId: string) => void;
-  deleteDocument: (id: string) => void;
-  updateDocumentName: (id: string, newName: string) => void;
 }

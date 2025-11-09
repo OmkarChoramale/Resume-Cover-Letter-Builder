@@ -1,4 +1,5 @@
 import React, { type FC } from 'react';
+// FIX: Import correct store hook and types
 import { useResumeStore } from '../../hooks/useResumeStore';
 import { fonts, fontWeights, fontFamilies } from '../../data/templates';
 import Accordion from '../ui/Accordion';

@@ -1,3 +1,4 @@
+// FIX: Import newly created Template and FontOption types.
 import type { Template, FontOption } from '../types';
 import ModernResume from '../components/templates/resume/ModernResume';
 import ClassicResume from '../components/templates/resume/ClassicResume';

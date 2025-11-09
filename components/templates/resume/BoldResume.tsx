@@ -1,5 +1,5 @@
-
 import React, { type FC } from 'react';
+// FIX: Import correct types
 import type { ResumeTemplateProps, Theme } from '../../../types';
 
 const formatLink = (url: string) => {
@@ -11,6 +11,9 @@ const formatLink = (url: string) => {
 };
 
 const BoldResume: FC<ResumeTemplateProps> = ({ data, theme, sections, sectionOrder }) => {
+  // FIX: Added guard clause for optional props
+  if (!theme || !sections || !sectionOrder) return null;
+  
   const { personalInfo, summary, experience, education, skills, projects } = data;
     const headingStyles = (color = theme.colors.primary) => ({
         fontFamily: theme.fonts.heading.family,

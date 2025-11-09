@@ -1,4 +1,5 @@
 import React, { type FC } from 'react';
+// FIX: Import correct types
 import type { ResumeTemplateProps, SectionKeys, Theme } from '../../../types';
 
 // Helper to generate heading styles
@@ -18,6 +19,9 @@ const formatLink = (url: string) => {
 };
 
 const ClassicResume: FC<ResumeTemplateProps> = ({ data, theme, sections, sectionOrder }) => {
+  // FIX: Added guard clause for optional props
+  if (!theme || !sections || !sectionOrder) return null;
+
   const { personalInfo, summary, experience, education, skills, projects, certificates, achievements, languages } = data;
 
    const renderSection = (key: SectionKeys) => {

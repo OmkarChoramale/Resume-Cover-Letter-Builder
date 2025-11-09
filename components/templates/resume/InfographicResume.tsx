@@ -1,5 +1,5 @@
-
 import React, { type FC } from 'react';
+// FIX: Import correct types
 import type { ResumeTemplateProps, Theme } from '../../../types';
 
 const formatLink = (url: string) => {
@@ -11,6 +11,9 @@ const formatLink = (url: string) => {
 };
 
 const InfographicResume: FC<ResumeTemplateProps> = ({ data, theme, sections }) => {
+  // FIX: Added guard clause for optional props
+  if (!theme || !sections) return null;
+
   const { personalInfo, summary, experience, education, skills } = data;
     const headingStyles = (size = '1.2rem') => ({
         fontFamily: theme.fonts.heading.family,

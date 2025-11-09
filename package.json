@@ -1,5 +1,5 @@
 {
-  "name": "elegance-resume-builder",
+  "name": "simple-resume-builder",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -15,7 +15,8 @@
     "react-rnd": "10.4.10",
     "immer": "10.1.1",
     "lodash-es": "4.17.21",
-    "@google/genai": "0.14.0"
+    "@google/genai": "0.14.0",
+    "lodash": "^4.17.21"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -1,5 +1,5 @@
-
 import React, { type FC, type CSSProperties } from 'react';
+// FIX: Import correct types
 import type { ResumeTemplateProps, SectionKeys, Theme } from '../../../types';
 
 const getHeadingStyles = (theme: Theme, color: string) => ({
@@ -23,6 +23,9 @@ const Link: FC<{ href: string; children: React.ReactNode; className?: string; st
 );
 
 const CreativeResume: FC<ResumeTemplateProps> = ({ data, theme, sections, sectionOrder }) => {
+  // FIX: Added guard clause for optional props
+  if (!theme || !sections || !sectionOrder) return null;
+  
   const { personalInfo, summary, experience, education, skills, projects, certificates } = data;
 
   const renderLeftSection = (key: SectionKeys) => {

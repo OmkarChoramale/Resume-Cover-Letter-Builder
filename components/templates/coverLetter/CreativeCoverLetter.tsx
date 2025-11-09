@@ -1,8 +1,10 @@
-
 import React, { type FC } from 'react';
 import type { ResumeTemplateProps } from '../../../types';
 
 const CreativeCoverLetter: FC<ResumeTemplateProps> = ({ data, theme }) => {
+  // FIX: Added guard clause for optional props
+  if (!theme) return null;
+  
   const { personalInfo, coverLetter } = data;
   const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 

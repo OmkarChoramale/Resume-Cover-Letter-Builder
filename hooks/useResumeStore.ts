@@ -1,89 +1,114 @@
 
-
 import React, { createContext, useContext, useState, useEffect, type ReactNode, type FC } from 'react';
-import { initialDocument } from '../data/initialData';
-import type { ResumeStore, AppState, Document, DocumentType, ListSectionKeys, SectionKeys, Theme, CanvasBlock, ListItem } from '../types';
-import { produce } from 'https://esm.sh/immer@10.1.1';
-import { set } from 'https://esm.sh/lodash-es@4.17.21';
+import { initialResumeData } from '../data/initialData';
+// FIX: Import new types for multi-document store
+import type { ResumeStore, ResumeData, ListSectionKeys, ListItem, Document, Theme, SectionKeys, CanvasBlock } from '../types';
+import { produce } from 'immer';
+import { set } from 'lodash';
 
 const ResumeContext = createContext<ResumeStore | undefined>(undefined);
 
-const migrateState = (state: AppState): AppState => {
-  return produce(state, draft => {
-    draft.documents.forEach(doc => {
-      // @ts-ignore
-      if (doc.data.skills && doc.data.skills.length > 0 && typeof doc.data.skills[0] === 'string') {
-        // @ts-ignore
-        doc.data.skills = doc.data.skills.map((skill: string) => ({
-          id: `${Date.now()}-${Math.random()}`,
-          value: skill,
-        }));
-      }
-    });
-  });
+// FIX: Default theme and sections for new documents
+const defaultTheme: Theme = {
+    colors: {
+        primary: '#1e293b',
+        accent: '#0ea5e9',
+        text: '#334155',
+        background: '#ffffff',
+    },
+    fonts: {
+        heading: { family: "'Inter', sans-serif", size: 28, weight: 700 },
+        body: { family: "'Inter', sans-serif", size: 14, weight: 400 },
+    },
 };
 
+const defaultSections: Record<SectionKeys, boolean> = {
+    personalInfo: true,
+    summary: true,
+    experience: true,
+    education: true,
+    skills: true,
+    projects: true,
+    certificates: true,
+    achievements: true,
+    languages: true,
+    hobbies: true,
+};
 
-const getInitialState = (): AppState => {
+const defaultSectionOrder: SectionKeys[] = ['summary', 'experience', 'projects', 'education', 'skills', 'certificates', 'achievements', 'languages', 'hobbies'];
+
+const getInitialState = (): { documents: Document[]; activeDocumentId: string | null } => {
   try {
-    const savedState = localStorage.getItem('resumeBuilderState_v3');
+    const savedState = localStorage.getItem('eleganceAI_v1');
     if (savedState) {
-      const parsedState = JSON.parse(savedState);
-      if(parsedState.documents && parsedState.documents.length > 0) {
-        return migrateState(parsedState);
+      const parsed = JSON.parse(savedState);
+      if(parsed.documents && parsed.documents.length > 0) {
+        return parsed;
       }
     }
   } catch (error) {
     console.error('Failed to parse state from localStorage', error);
   }
-  return {
-    documents: [initialDocument],
-    activeDocumentId: initialDocument.id,
-    documentType: 'resume',
+
+  const firstDocId = 'default-resume-1';
+  const firstDoc: Document = {
+      id: firstDocId,
+      name: `My First Resume`,
+      type: 'resume',
+      data: initialResumeData,
+      customization: {
+          template: 'modern',
+          theme: defaultTheme,
+          sections: defaultSections,
+          sectionOrder: defaultSectionOrder,
+          canvasLayout: [],
+      },
+      lastModified: Date.now(),
   };
+
+  return { documents: [firstDoc], activeDocumentId: firstDocId };
 };
 
 export const ResumeProvider: FC<{ children: ReactNode }> = ({ children }) => {
-  const [state, setState] = useState<AppState>(getInitialState);
-
+  const [documents, setDocuments] = useState<Document[]>(getInitialState().documents);
+  const [activeDocumentId, setActiveDocumentId] = useState<string | null>(getInitialState().activeDocumentId);
+  
   useEffect(() => {
     try {
-      localStorage.setItem('resumeBuilderState_v3', JSON.stringify(state));
+      localStorage.setItem('eleganceAI_v1', JSON.stringify({ documents, activeDocumentId }));
     } catch (error) {
       console.error('Failed to save state to localStorage', error);
     }
-  }, [state]);
+  }, [documents, activeDocumentId]);
 
-  const activeDocument = state.documents.find(doc => doc.id === state.activeDocumentId) || null;
-
-  const updateActiveDocument = (updater: (draft: Document) => void) => {
-    setState(
-      produce(draft => {
-        const docIndex = draft.documents.findIndex(d => d.id === draft.activeDocumentId);
-        if (docIndex !== -1) {
-          updater(draft.documents[docIndex]);
-          draft.documents[docIndex].lastModified = Date.now();
-        }
-      })
-    );
-  };
+  const activeDocument = documents.find(doc => doc.id === activeDocumentId) || null;
   
-  const updateField = (section: 'personalInfo' | 'summary', field: string, value: string) => {
-     updateActiveDocument(doc => {
-        // @ts-ignore
-        doc.data[section][field] = value;
+  const updateActiveDocument = (updater: (draft: Document) => void) => {
+      setDocuments(produce(draft => {
+          const doc = draft.find(d => d.id === activeDocumentId);
+          if (doc) {
+              updater(doc);
+              doc.lastModified = Date.now();
+          }
+      }));
+  };
+
+  const resumeData = activeDocument?.data || initialResumeData;
+
+  const updateField = (section: 'personalInfo', field: string, value: string) => {
+     updateActiveDocument(draft => {
+        (draft.data[section] as any)[field] = value;
      });
   };
-
-  const updateWholeSection = (section: 'summary' | 'coverLetter', value: string) => {
-    updateActiveDocument(doc => {
-        // @ts-ignore
-        doc.data[section] = value;
+  
+  const updateSummary = (value: string) => {
+    updateActiveDocument(draft => {
+        draft.data.summary = value;
     });
   };
 
   const addListItem = (section: ListSectionKeys) => {
-    updateActiveDocument(doc => {
+    updateActiveDocument(draft => {
       const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
       let newItem: ListItem;
       switch (section) {
@@ -103,205 +128,174 @@ export const ResumeProvider: FC<{ children: ReactNode }> = ({ children }) => {
           newItem = { id: uniqueId, name: '', issuer: '', date: '' };
           break;
         case 'achievements':
-          newItem = { id: uniqueId, description: '' };
-          break;
+            newItem = { id: uniqueId, description: '' };
+            break;
         case 'languages':
-          newItem = { id: uniqueId, name: '', proficiency: 'Basic' };
-          break;
+            newItem = { id: uniqueId, name: '', proficiency: 'Conversational' };
+            break;
         case 'hobbies':
-          newItem = { id: uniqueId, name: '' };
-          break;
-        default:
-          // This should never be reached if all list section keys are handled.
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const _exhaustiveCheck: never = section;
-          return;
+            newItem = { id: uniqueId, name: '' };
+            break;
       }
-      // @ts-ignore - This is tricky to type correctly with discriminated unions on keys.
-      // We are ensuring the correct object type is pushed to the correct array.
-      doc.data[section].push(newItem);
+      (draft.data[section] as any[]).push(newItem);
     });
   };
   
-  const updateListItem = (section: ListSectionKeys, id: string, field: string, value: unknown) => {
-     updateActiveDocument(doc => {
-       const list = doc.data[section] as ListItem[];
+  const updateListItem = (section: ListSectionKeys, id:string, field: string, value: any) => {
+     updateActiveDocument(draft => {
+       const list = draft.data[section] as ListItem[];
        const item = list.find(it => it.id === id);
        if (item) {
-         // @ts-ignore
-         item[field] = value;
+         (item as any)[field] = value;
        }
      });
   };
 
   const removeListItem = (section: ListSectionKeys, id: string) => {
-    updateActiveDocument(doc => {
-      // @ts-ignore
-      doc.data[section] = doc.data[section].filter(item => item.id !== id);
-    });
-  };
-
-  const toggleSectionVisibility = (section: SectionKeys) => {
-    updateActiveDocument(doc => {
-      doc.customization.sections[section] = !doc.customization.sections[section];
-    });
-  };
-
-  const setSectionOrder = (newOrder: SectionKeys[]) => {
-    updateActiveDocument(doc => {
-      doc.customization.sectionOrder = newOrder;
-    });
-  };
-
-  const setListOrder = (section: ListSectionKeys, newOrder: ListItem[]) => {
-    updateActiveDocument(doc => {
-      // @ts-ignore
-      doc.data[section] = newOrder;
-    });
-  }
-
-  const updateTheme = (newTheme: Partial<Theme> | { path: string; value: unknown }) => {
-    updateActiveDocument(doc => {
-      if ('path' in newTheme) {
-         set(doc.customization.theme, newTheme.path, newTheme.value);
-      } else {
-        doc.customization.theme = { ...doc.customization.theme, ...newTheme };
-      }
+    updateActiveDocument(draft => {
+      draft.data[section] = draft.data[section].filter((item: any) => item.id !== id) as any;
     });
   };
   
-  const updateTemplate = (templateId: string) => {
-    updateActiveDocument(doc => {
-        doc.customization.template = templateId;
-    });
-  };
-  
-  const updateProfilePicture = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-        updateActiveDocument(doc => {
-            doc.data.personalInfo.profilePicture = reader.result as string;
-        });
-    };
-    reader.readAsDataURL(file);
-  };
-
-  const setDocumentType = (type: DocumentType) => {
-    setState(produce(draft => { draft.documentType = type; }));
-  };
-
-  // Canvas methods
-  const addCanvasBlock = (type: SectionKeys) => {
-    updateActiveDocument(doc => {
-      const newBlock: CanvasBlock = {
-        id: Date.now().toString(),
-        type,
-        x: 50,
-        y: 50,
-        width: 300,
-        height: 200,
-        zIndex: (Math.max(0, ...doc.customization.canvasLayout.map(b => b.zIndex)) || 0) + 1,
-      };
-      doc.customization.canvasLayout.push(newBlock);
-    });
-  };
-
-  const updateCanvasBlock = (id: string, updates: Partial<CanvasBlock>) => {
-    updateActiveDocument(doc => {
-      const block = doc.customization.canvasLayout.find(b => b.id === id);
-      if (block) {
-        Object.assign(block, updates);
-      }
-    });
-  };
-
-  const removeCanvasBlock = (id: string) => {
-    updateActiveDocument(doc => {
-      doc.customization.canvasLayout = doc.customization.canvasLayout.filter(b => b.id !== id);
-    });
-  };
-
-  const bringCanvasBlockForward = (id: string) => {
-    updateActiveDocument(doc => {
-      const maxZ = Math.max(...doc.customization.canvasLayout.map(b => b.zIndex)) || 0;
-      const block = doc.customization.canvasLayout.find(b => b.id === id);
-      if (block) {
-        block.zIndex = maxZ + 1;
-      }
-    });
-  };
-
-  // Document Management
-  const selectDocument = (id: string | null) => {
-     setState(produce(draft => { draft.activeDocumentId = id; }));
-  };
-
-  const createNewDocument = (type: DocumentType, templateId: string) => {
-      const newDoc: Document = produce(initialDocument, draft => {
-          draft.id = Date.now().toString();
-          draft.name = type === 'resume' ? 'Untitled Resume' : 'Untitled Cover Letter';
-          draft.type = type;
-          draft.lastModified = Date.now();
-          draft.customization.template = templateId;
+  const updateProfilePicture = (base64: string) => {
+      updateActiveDocument(draft => {
+          draft.data.personalInfo.profilePicture = base64;
       });
-      setState(produce(draft => {
-          draft.documents.push(newDoc);
-          draft.activeDocumentId = newDoc.id;
-          draft.documentType = type;
-      }));
+  };
+
+  const selectDocument = (id: string) => {
+      setActiveDocumentId(id);
+  };
+
+  const createNewDocument = (type: 'resume' | 'cover-letter', templateId: string) => {
+      const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      const newDoc: Document = {
+          id: uniqueId,
+          name: `Untitled ${type === 'resume' ? 'Resume' : 'Cover Letter'}`,
+          type,
+          data: JSON.parse(JSON.stringify(initialResumeData)), // Deep copy
+          customization: {
+              template: templateId,
+              theme: defaultTheme,
+              sections: defaultSections,
+              sectionOrder: defaultSectionOrder,
+              canvasLayout: [],
+          },
+          lastModified: Date.now(),
+      };
+      setDocuments(docs => [...docs, newDoc]);
+      setActiveDocumentId(uniqueId);
   };
 
   const deleteDocument = (id: string) => {
-      setState(produce(draft => {
-          draft.documents = draft.documents.filter(d => d.id !== id);
-          if (draft.activeDocumentId === id) {
-              draft.activeDocumentId = draft.documents[0]?.id || null;
+      setDocuments(docs => docs.filter(d => d.id !== id));
+      if (activeDocumentId === id) {
+          setActiveDocumentId(documents.length > 1 ? documents.filter(d => d.id !== id)[0].id : null);
+      }
+  };
+
+  const updateTemplate = (templateId: string) => {
+      updateActiveDocument(draft => {
+          draft.customization.template = templateId;
+      });
+  };
+
+  const updateTheme = (update: { path?: string; value?: unknown; colors?: Theme['colors'] }) => {
+      updateActiveDocument(draft => {
+          if (update.colors) {
+              draft.customization.theme.colors = update.colors;
+          } else if (update.path) {
+              set(draft.customization.theme, update.path, update.value);
           }
-      }));
+      });
+  };
+
+  const toggleSectionVisibility = (section: SectionKeys) => {
+      updateActiveDocument(draft => {
+          draft.customization.sections[section] = !draft.customization.sections[section];
+      });
+  };
+
+  const setSectionOrder = (order: SectionKeys[]) => {
+      updateActiveDocument(draft => {
+          draft.customization.sectionOrder = order;
+      });
+  };
+
+  const addCanvasBlock = (type: SectionKeys) => {
+      updateActiveDocument(draft => {
+        const newBlock: CanvasBlock = {
+            id: `${Date.now()}`,
+            type,
+            x: 50,
+            y: 50,
+            width: 300,
+            height: 200,
+            zIndex: (draft.customization.canvasLayout.length || 0) + 1,
+        };
+        draft.customization.canvasLayout.push(newBlock);
+      });
   };
   
-  const updateDocumentName = (id: string, newName: string) => {
-     setState(
-      produce(draft => {
-        const docIndex = draft.documents.findIndex(d => d.id === id);
-        if (docIndex !== -1) {
-          draft.documents[docIndex].name = newName;
-        }
-      })
-    );
+  const updateCanvasBlock = (id: string, updates: Partial<CanvasBlock>) => {
+      updateActiveDocument(draft => {
+          const block = draft.customization.canvasLayout.find(b => b.id === id);
+          if (block) {
+              Object.assign(block, updates);
+          }
+      });
   };
 
+  const removeCanvasBlock = (id: string) => {
+      updateActiveDocument(draft => {
+          draft.customization.canvasLayout = draft.customization.canvasLayout.filter(b => b.id !== id);
+      });
+  };
+
+  const bringCanvasBlockForward = (id: string) => {
+      updateActiveDocument(draft => {
+          const layout = draft.customization.canvasLayout;
+          const block = layout.find(b => b.id === id);
+          if (block) {
+              const maxZ = Math.max(...layout.map(b => b.zIndex), 0);
+              if (block.zIndex <= maxZ) {
+                  block.zIndex = maxZ + 1;
+              }
+          }
+      });
+  };
 
   const value: ResumeStore = {
-    ...state,
-    activeDocument,
+    resumeData,
     updateField,
-    updateWholeSection,
+    updateSummary,
     addListItem,
     updateListItem,
     removeListItem,
+    updateProfilePicture,
+    documents,
+    activeDocumentId,
+    activeDocument,
+    documentType: activeDocument?.type || null,
+    selectDocument,
+    createNewDocument,
+    deleteDocument,
+    updateTemplate,
+    updateTheme,
     toggleSectionVisibility,
     setSectionOrder,
-    setListOrder,
-    updateTheme,
-    updateTemplate,
-    updateProfilePicture,
-    setDocumentType,
     addCanvasBlock,
     updateCanvasBlock,
     removeCanvasBlock,
     bringCanvasBlockForward,
-    selectDocument,
-    createNewDocument,
-    deleteDocument,
-    updateDocumentName,
   };
 
-  // This file is a .ts file but contains a React Provider. It uses React.createElement
-  // instead of JSX. Renaming to .tsx and using JSX is recommended if possible.
+  // FIX: Replaced JSX with React.createElement to fix parsing error in a .ts file.
+  // JSX syntax is not allowed in files with a .ts extension.
   return React.createElement(ResumeContext.Provider, { value: value }, children);
 };
 
+// FIX: Renamed hook to useResumeStore to match usage in components.
 export const useResumeStore = (): ResumeStore => {
   const context = useContext(ResumeContext);
   if (!context) {

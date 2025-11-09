@@ -1,4 +1,3 @@
-
 import React, { type FC } from 'react';
 import type { ResumeTemplateProps } from '../../../types';
 
@@ -11,6 +10,9 @@ const formatLink = (url: string) => {
 };
 
 const EmailCoverLetter: FC<ResumeTemplateProps> = ({ data, theme }) => {
+  // FIX: Added guard clause for optional props
+  if (!theme) return null;
+  
   const { personalInfo, coverLetter } = data;
 
   return (

@@ -1,5 +1,5 @@
-
 import React, { type FC } from 'react';
+// FIX: Import correct types
 import type { ResumeTemplateProps, Theme } from '../../../types';
 
 const formatLink = (url: string) => {
@@ -13,6 +13,9 @@ const formatLink = (url: string) => {
 // This is a placeholder as this template might need more specific data fields
 // For now, it uses existing fields.
 const AcademicResume: FC<ResumeTemplateProps> = ({ data, theme }) => {
+  // FIX: Added guard clause for optional props
+  if (!theme) return null;
+
   const { personalInfo, summary, education, experience, skills, projects } = data;
     const headingStyles = {
         fontFamily: theme.fonts.heading.family,

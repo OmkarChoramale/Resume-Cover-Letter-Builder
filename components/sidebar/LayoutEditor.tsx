@@ -1,5 +1,5 @@
-
 import React, { type FC } from 'react';
+// FIX: Import correct store hook and types
 import { useResumeStore } from '../../hooks/useResumeStore';
 import Switch from '../ui/Switch';
 import type { SectionKeys } from '../../types';

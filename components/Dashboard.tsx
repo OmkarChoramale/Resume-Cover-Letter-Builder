@@ -1,14 +1,13 @@
 import React, { type FC, type SVGProps } from 'react';
+// FIX: Import useResumeStore hook and Document type.
 import { useResumeStore } from '../hooks/useResumeStore';
 import type { Document } from '../types';
-// FIX: Import Variants type from framer-motion to correctly type animation variants.
 import { motion, type Variants } from 'framer-motion';
 
 interface DashboardProps {
     onSelectDocument: () => void;
 }
 
-// FIX: Explicitly type containerVariants with Variants to prevent type inference issues.
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -20,7 +19,6 @@ const containerVariants: Variants = {
     },
 };
 
-// FIX: Explicitly type itemVariants with Variants. This resolves the error where `type: "spring"` was inferred as `string` instead of a specific animation type.
 const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } },

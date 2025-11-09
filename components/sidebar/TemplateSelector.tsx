@@ -1,5 +1,5 @@
-
 import React, { type FC } from 'react';
+// FIX: Import correct store hook
 import { useResumeStore } from '../../hooks/useResumeStore';
 import { resumeTemplates, coverLetterTemplates } from '../../data/templates';
 

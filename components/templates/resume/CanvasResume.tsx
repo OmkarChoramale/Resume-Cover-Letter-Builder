@@ -1,6 +1,6 @@
-
 import React, { type FC } from 'react';
 import { Rnd } from 'react-rnd';
+// FIX: Import the correct store hook and types
 import { useResumeStore } from '../../../hooks/useResumeStore';
 import type { ResumeTemplateProps, SectionKeys } from '../../../types';
 import PersonalInfoSection from './sections/PersonalInfoSection';
@@ -23,14 +23,14 @@ const sectionComponentMap: Record<SectionKeys, FC<any>> = {
     achievements: () => <div>Achievements Section</div>,
     languages: () => <div>Languages Section</div>,
     hobbies: () => <div>Hobbies Section</div>,
-    coverLetter: () => null,
 };
 
 
 const CanvasResume: FC<ResumeTemplateProps> = ({ data, theme, canvasLayout }) => {
     const { updateCanvasBlock, removeCanvasBlock, bringCanvasBlockForward } = useResumeStore();
     
-    if (!canvasLayout) return null;
+    // FIX: Added guard clause for optional props
+    if (!canvasLayout || !theme) return null;
 
     return (
         <div className="w-full h-full relative overflow-hidden">

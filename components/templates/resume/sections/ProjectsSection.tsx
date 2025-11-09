@@ -1,5 +1,5 @@
-
 import React, { type FC } from 'react';
+// FIX: Import correct types
 import type { ResumeData, Theme } from '../../../../types';
 
 interface SectionProps {
@@ -8,6 +8,9 @@ interface SectionProps {
 }
 
 const ProjectsSection: FC<SectionProps> = ({ data, theme }) => {
+    // FIX: Add guard clause for optional theme prop
+    if (!theme) return null;
+    
     const { projects } = data;
      const headingStyles = {
         fontFamily: theme.fonts.heading.family,
