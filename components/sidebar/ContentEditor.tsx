@@ -5,7 +5,6 @@ import Accordion from '../ui/Accordion';
 import Input from '../ui/Input';
 import Textarea from '../ui/Textarea';
 import ListSection from './ListSection';
-import AIGenerateButton from './AIGenerateButton';
 
 const ContentEditor: FC = () => {
     const store = useResumeStore();
@@ -16,20 +15,6 @@ const ContentEditor: FC = () => {
         if (e.target.files && e.target.files[0]) {
             store.updateProfilePicture(e.target.files[0]);
         }
-    };
-    
-    const generateCoverLetterPrompt = () => {
-        const { personalInfo, experience } = store.activeDocument.data;
-        const latestExperience = experience[0] 
-            ? `My most recent role was as a ${experience[0].role} at ${experience[0].company}, where I was responsible for the following: ${experience[0].description}.` 
-            : 'I have a solid background in my field and am eager to bring my skills to a new challenge.';
-        return `Write a professional and compelling cover letter for ${personalInfo.name}, a ${personalInfo.title}. The letter should be addressed to "Dear Hiring Manager,". Incorporate the following experience: ${latestExperience}. The tone should be enthusiastic and confident. The cover letter should highlight key skills and express strong interest in a new opportunity. End with a call to action and sign off with "Sincerely,\n${personalInfo.name}".`;
-    };
-    
-    const generateSummaryPrompt = () => {
-        const { personalInfo, experience } = store.activeDocument.data;
-        const experienceText = experience.map(exp => `- Worked as a ${exp.role} at ${exp.company} from ${exp.startDate} to ${exp.endDate}. Key responsibilities included: ${exp.description.replace(/•/g, '').trim()}`).join('\n');
-        return `Write a professional and concise summary for a resume. The candidate's name is ${personalInfo.name} and their title is ${personalInfo.title}. Their work experience is as follows:\n\n${experienceText}\n\nGenerate a summary of 2-4 sentences that highlights their key skills and experience. The tone should be confident and professional. Do not use the first person (e.g., "I am"). Start with a phrase like "Experienced ${personalInfo.title} with a proven track record..." or similar.`;
     };
 
     return (
@@ -59,11 +44,6 @@ const ContentEditor: FC = () => {
                          <Input label="Website" value={store.activeDocument.data.personalInfo.website} onChange={e => store.updateField('personalInfo', 'website', e.target.value)} placeholder="your-portfolio.com"/>
                     </Accordion>
                     <Accordion title="Summary">
-                        <AIGenerateButton
-                            prompt={generateSummaryPrompt()}
-                            onComplete={(text) => store.updateWholeSection('summary', text)}
-                            className="mb-4"
-                        />
                         <Textarea label="Professional Summary" value={store.activeDocument.data.summary} onChange={e => store.updateWholeSection('summary', e.target.value)} rows={5} />
                     </Accordion>
                     <ListSection section="experience" title="Experience" />
@@ -77,11 +57,6 @@ const ContentEditor: FC = () => {
                 </>
             ) : (
                 <Accordion title="Cover Letter Content">
-                    <AIGenerateButton
-                        prompt={generateCoverLetterPrompt()}
-                        onComplete={(text) => store.updateWholeSection('coverLetter', text)}
-                        className="mb-4"
-                    />
                     <Textarea label="Cover Letter" value={store.activeDocument.data.coverLetter || ''} onChange={e => store.updateWholeSection('coverLetter', e.target.value)} rows={20} />
                 </Accordion>
             )}

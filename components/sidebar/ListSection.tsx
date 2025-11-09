@@ -5,7 +5,6 @@ import type { ListSectionKeys, ListItem, Experience, Education, Project, Skill, 
 import Accordion from '../ui/Accordion';
 import Input from '../ui/Input';
 import Textarea from '../ui/Textarea';
-import AIGenerateButton from './AIGenerateButton';
 
 const ListSection: FC<{ section: ListSectionKeys; title: string; }> = ({ section, title }) => {
     const store = useResumeStore();
@@ -17,21 +16,12 @@ const ListSection: FC<{ section: ListSectionKeys; title: string; }> = ({ section
         switch (section) {
             case 'experience': {
                 const exp = item as Experience;
-                const canGenerate = !!(exp.role && exp.company);
-                const prompt = `Create a professional job description for the role of '${exp.role}' at '${exp.company}'. Focus on key responsibilities and achievements. Use bullet points starting with '• '.`;
                 return <>
                     <Input label="Company" value={exp.company} onChange={e => store.updateListItem(section, exp.id, 'company', e.target.value)} />
                     <Input label="Role" value={exp.role} onChange={e => store.updateListItem(section, exp.id, 'role', e.target.value)} />
                     <Input label="Start Date" value={exp.startDate} onChange={e => store.updateListItem(section, exp.id, 'startDate', e.target.value)} />
                     <Input label="End Date" value={exp.endDate} onChange={e => store.updateListItem(section, exp.id, 'endDate', e.target.value)} />
                     <Textarea label="Description" value={exp.description} onChange={e => store.updateListItem(section, exp.id, 'description', e.target.value)} rows={4}/>
-                    {canGenerate && (
-                        <AIGenerateButton 
-                        prompt={prompt}
-                        onComplete={(text) => store.updateListItem(section, exp.id, 'description', text)}
-                        className="mt-2"
-                        />
-                    )}
                 </>;
             }
             case 'education': {
