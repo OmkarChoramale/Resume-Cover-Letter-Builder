@@ -1,4 +1,3 @@
-
 import React, { type FC } from 'react';
 import { useResumeStore } from '../../hooks/useResumeStore';
 import { fonts, fontWeights, fontFamilies } from '../../data/templates';
@@ -79,8 +78,25 @@ const StyleEditor: FC = () => {
                  <div>
                     <h4 className="text-md font-semibold mb-2 text-gray-300">Headings</h4>
                     <div className="space-y-3 p-3 bg-black/20 rounded-lg">
-                        <select value={getFontName(theme.fonts.heading.family)} onChange={e => handleThemeChange('fonts.heading.family', fontFamilies[e.target.value])} className="w-full p-2 border border-[var(--border-color)] rounded-lg bg-black/30 text-white focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition">
-                            {fonts.map(font => <option key={font.name} value={font.name.toLowerCase().replace(' ', '')}>{font.name}</option>)}
+                        <select 
+                            value={getFontName(theme.fonts.heading.family)} 
+                            onChange={e => handleThemeChange('fonts.heading.family', fontFamilies[e.target.value])} 
+                            className="w-full p-2 border border-[var(--border-color)] rounded-lg bg-black/30 text-white focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition"
+                            style={{ fontFamily: theme.fonts.heading.family, fontSize: '1rem' }}
+                        >
+                            {fonts.map(font => {
+                                const fontFamilyKey = font.name.toLowerCase().replace(/ /g, '');
+                                const fontFamilyValue = fontFamilies[fontFamilyKey];
+                                return (
+                                    <option 
+                                        key={font.name} 
+                                        value={fontFamilyKey} 
+                                        style={{ fontFamily: fontFamilyValue, fontSize: '1rem' }}
+                                    >
+                                        {font.name}
+                                    </option>
+                                );
+                            })}
                         </select>
                         <div className="grid grid-cols-2 gap-2">
                              <Input label="Size (px)" type="number" value={theme.fonts.heading.size} onChange={e => handleThemeChange('fonts.heading.size', parseInt(e.target.value))} />
@@ -96,8 +112,25 @@ const StyleEditor: FC = () => {
                  <div>
                     <h4 className="text-md font-semibold mt-4 mb-2 text-gray-300">Body Text</h4>
                      <div className="space-y-3 p-3 bg-black/20 rounded-lg">
-                        <select value={getFontName(theme.fonts.body.family)} onChange={e => handleThemeChange('fonts.body.family', fontFamilies[e.target.value])} className="w-full p-2 border border-[var(--border-color)] rounded-lg bg-black/30 text-white focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition">
-                            {fonts.map(font => <option key={font.name} value={font.name.toLowerCase().replace(' ', '')}>{font.name}</option>)}
+                        <select 
+                            value={getFontName(theme.fonts.body.family)} 
+                            onChange={e => handleThemeChange('fonts.body.family', fontFamilies[e.target.value])} 
+                            className="w-full p-2 border border-[var(--border-color)] rounded-lg bg-black/30 text-white focus:ring-2 focus:ring-[var(--accent)] focus:border-[var(--accent)] transition"
+                            style={{ fontFamily: theme.fonts.body.family, fontSize: '1rem' }}
+                        >
+                             {fonts.map(font => {
+                                const fontFamilyKey = font.name.toLowerCase().replace(/ /g, '');
+                                const fontFamilyValue = fontFamilies[fontFamilyKey];
+                                return (
+                                    <option 
+                                        key={font.name} 
+                                        value={fontFamilyKey} 
+                                        style={{ fontFamily: fontFamilyValue, fontSize: '1rem' }}
+                                    >
+                                        {font.name}
+                                    </option>
+                                );
+                            })}
                         </select>
                          <div className="grid grid-cols-2 gap-2">
                             <Input label="Size (px)" type="number" value={theme.fonts.body.size} onChange={e => handleThemeChange('fonts.body.size', parseInt(e.target.value))} />

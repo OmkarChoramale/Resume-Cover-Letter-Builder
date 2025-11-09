@@ -1,4 +1,3 @@
-
 import React, { type FC } from 'react';
 import type { ResumeTemplateProps, SectionKeys, Theme } from '../../../types';
 
@@ -64,9 +63,9 @@ const ClassicResume: FC<ResumeTemplateProps> = ({ data, theme, sections, section
             </div>
         ))}</Section>;
       case 'achievements':
-         return achievements.length > 0 && <Section title="Achievements" theme={theme}><ul className="list-disc pl-5 space-y-1">{achievements.map(ach => <li key={ach.id}>{ach.description}</li>)}</ul></section>;
+         return achievements.length > 0 && <Section title="Achievements" theme={theme}><ul className="list-disc pl-5 space-y-1">{achievements.map(ach => <li key={ach.id}>{ach.description}</li>)}</ul></Section>;
       case 'languages':
-         return languages.length > 0 && <Section title="Languages" theme={theme}><p>{languages.map(lang => `${lang.name} (${lang.proficiency})`).join(' | ')}</p></section>;
+         return languages.length > 0 && <Section title="Languages" theme={theme}><p>{languages.map(lang => `${lang.name} (${lang.proficiency})`).join(' | ')}</p></Section>;
       default:
         return null;
     }
