@@ -5,6 +5,26 @@ import { fonts, fontWeights, fontFamilies } from '../../data/templates';
 import Accordion from '../ui/Accordion';
 import Input from '../ui/Input';
 import ColorInput from '../ui/ColorInput';
+import type { Theme } from '../../types';
+
+const themePresets: { name: string; colors: Theme['colors'] }[] = [
+    {
+        name: 'Midnight Slate',
+        colors: { primary: '#1e293b', accent: '#0ea5e9', text: '#334155', background: '#ffffff' },
+    },
+    {
+        name: 'Forest Emerald',
+        colors: { primary: '#064e3b', accent: '#34d399', text: '#1f2937', background: '#f9fafb' },
+    },
+    {
+        name: 'Crimson Gold',
+        colors: { primary: '#991b1b', accent: '#f59e0b', text: '#171717', background: '#ffffff' },
+    },
+    {
+        name: 'Royal Indigo',
+        colors: { primary: '#4338ca', accent: '#a78bfa', text: '#1e1b4b', background: '#f5f3ff' },
+    },
+];
 
 const StyleEditor: FC = () => {
     const store = useResumeStore();
@@ -15,6 +35,10 @@ const StyleEditor: FC = () => {
     const handleThemeChange = (path: string, value: unknown) => {
         store.updateTheme({ path, value });
     };
+
+    const handlePresetClick = (colors: Theme['colors']) => {
+        store.updateTheme({ colors });
+    };
     
     const getFontName = (family: string) => {
         const entry = Object.entries(fontFamilies).find(([, f]) => f === family);
@@ -23,6 +47,26 @@ const StyleEditor: FC = () => {
 
     return (
         <div className="space-y-6">
+            <Accordion title="Theme Presets">
+                <p className="text-xs text-gray-400 mb-3">Select a pre-defined theme to get started.</p>
+                <div className="grid grid-cols-2 gap-3">
+                    {themePresets.map(preset => (
+                        <div 
+                            key={preset.name} 
+                            onClick={() => handlePresetClick(preset.colors)} 
+                            className="cursor-pointer p-2 border border-white/20 rounded-lg hover:border-[var(--accent)] transition-colors"
+                        >
+                            <div className="flex h-8 w-full rounded overflow-hidden mb-1">
+                                <div style={{ backgroundColor: preset.colors.primary }} className="w-1/4 h-full"></div>
+                                <div style={{ backgroundColor: preset.colors.accent }} className="w-1/4 h-full"></div>
+                                <div style={{ backgroundColor: preset.colors.text }} className="w-1/4 h-full"></div>
+                                <div style={{ backgroundColor: preset.colors.background, border: '1px solid #333' }} className="w-1/4 h-full"></div>
+                            </div>
+                            <p className="text-xs text-center text-gray-300">{preset.name}</p>
+                        </div>
+                    ))}
+                </div>
+            </Accordion>
             <Accordion title="Colors">
                 <div className="grid grid-cols-2 gap-4">
                     <ColorInput label="Primary/Headings" value={theme.colors.primary} onChange={e => handleThemeChange('colors.primary', e.target.value)} />

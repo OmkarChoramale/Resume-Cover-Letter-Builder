@@ -64,9 +64,9 @@ const ClassicResume: FC<ResumeTemplateProps> = ({ data, theme, sections, section
             </div>
         ))}</Section>;
       case 'achievements':
-         return achievements.length > 0 && <Section title="Achievements" theme={theme}><ul className="list-disc pl-5 space-y-1">{achievements.map(ach => <li key={ach.id}>{ach.description}</li>)}</ul></Section>;
+         return achievements.length > 0 && <Section title="Achievements" theme={theme}><ul className="list-disc pl-5 space-y-1">{achievements.map(ach => <li key={ach.id}>{ach.description}</li>)}</ul></section>;
       case 'languages':
-         return languages.length > 0 && <Section title="Languages" theme={theme}><p>{languages.map(lang => `${lang.name} (${lang.proficiency})`).join(' | ')}</p></Section>;
+         return languages.length > 0 && <Section title="Languages" theme={theme}><p>{languages.map(lang => `${lang.name} (${lang.proficiency})`).join(' | ')}</p></section>;
       default:
         return null;
     }

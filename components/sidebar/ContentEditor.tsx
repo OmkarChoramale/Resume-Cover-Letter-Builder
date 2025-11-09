@@ -5,6 +5,7 @@ import Accordion from '../ui/Accordion';
 import Input from '../ui/Input';
 import Textarea from '../ui/Textarea';
 import ListSection from './ListSection';
+import AIGenerateButton from './AIGenerateButton';
 
 const ContentEditor: FC = () => {
     const store = useResumeStore();
@@ -17,6 +18,20 @@ const ContentEditor: FC = () => {
         }
     };
     
+    const generateCoverLetterPrompt = () => {
+        const { personalInfo, experience } = store.activeDocument.data;
+        const latestExperience = experience[0] 
+            ? `My most recent role was as a ${experience[0].role} at ${experience[0].company}, where I was responsible for the following: ${experience[0].description}.` 
+            : 'I have a solid background in my field and am eager to bring my skills to a new challenge.';
+        return `Write a professional and compelling cover letter for ${personalInfo.name}, a ${personalInfo.title}. The letter should be addressed to "Dear Hiring Manager,". Incorporate the following experience: ${latestExperience}. The tone should be enthusiastic and confident. The cover letter should highlight key skills and express strong interest in a new opportunity. End with a call to action and sign off with "Sincerely,\n${personalInfo.name}".`;
+    };
+    
+    const generateSummaryPrompt = () => {
+        const { personalInfo, experience } = store.activeDocument.data;
+        const experienceText = experience.map(exp => `- Worked as a ${exp.role} at ${exp.company} from ${exp.startDate} to ${exp.endDate}. Key responsibilities included: ${exp.description.replace(/•/g, '').trim()}`).join('\n');
+        return `Write a professional and concise summary for a resume. The candidate's name is ${personalInfo.name} and their title is ${personalInfo.title}. Their work experience is as follows:\n\n${experienceText}\n\nGenerate a summary of 2-4 sentences that highlights their key skills and experience. The tone should be confident and professional. Do not use the first person (e.g., "I am"). Start with a phrase like "Experienced ${personalInfo.title} with a proven track record..." or similar.`;
+    };
+
     return (
         <div className="space-y-4">
             {store.documentType === 'resume' ? (
@@ -44,19 +59,29 @@ const ContentEditor: FC = () => {
                          <Input label="Website" value={store.activeDocument.data.personalInfo.website} onChange={e => store.updateField('personalInfo', 'website', e.target.value)} placeholder="your-portfolio.com"/>
                     </Accordion>
                     <Accordion title="Summary">
+                        <AIGenerateButton
+                            prompt={generateSummaryPrompt()}
+                            onComplete={(text) => store.updateWholeSection('summary', text)}
+                            className="mb-4"
+                        />
                         <Textarea label="Professional Summary" value={store.activeDocument.data.summary} onChange={e => store.updateWholeSection('summary', e.target.value)} rows={5} />
                     </Accordion>
-                    <ListSection section="experience" title="Experience" fields={{ company: 'Company', role: 'Role', startDate: 'Start Date', endDate: 'End Date', description: {type: 'textarea', rows: 4} }} />
-                    <ListSection section="education" title="Education" fields={{ institution: 'Institution', degree: 'Degree', startDate: 'Start Date', endDate: 'End Date', gpa: 'GPA' }} />
-                    <ListSection section="projects" title="Projects" fields={{ name: 'Project Name', description: { type: 'textarea' }, link: 'Link' }} />
+                    <ListSection section="experience" title="Experience" />
+                    <ListSection section="education" title="Education" />
+                    <ListSection section="projects" title="Projects" />
                     <ListSection section="skills" title="Skills" />
-                    <ListSection section="certificates" title="Certificates" fields={{ name: 'Certificate Name', issuer: 'Issuer', date: 'Date' }} />
-                    <ListSection section="achievements" title="Achievements" fields={{ description: { type: 'textarea', label: 'Achievement' } }} />
-                    <ListSection section="languages" title="Languages" fields={{ name: 'Language', proficiency: { type: 'select', options: ['Native', 'Fluent', 'Proficient', 'Intermediate', 'Basic'] } }} />
-                    <ListSection section="hobbies" title="Hobbies" fields={{ name: 'Hobby' }} />
+                    <ListSection section="certificates" title="Certificates" />
+                    <ListSection section="achievements" title="Achievements" />
+                    <ListSection section="languages" title="Languages" />
+                    <ListSection section="hobbies" title="Hobbies" />
                 </>
             ) : (
                 <Accordion title="Cover Letter Content">
+                    <AIGenerateButton
+                        prompt={generateCoverLetterPrompt()}
+                        onComplete={(text) => store.updateWholeSection('coverLetter', text)}
+                        className="mb-4"
+                    />
                     <Textarea label="Cover Letter" value={store.activeDocument.data.coverLetter || ''} onChange={e => store.updateWholeSection('coverLetter', e.target.value)} rows={20} />
                 </Accordion>
             )}

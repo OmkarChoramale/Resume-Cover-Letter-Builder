@@ -1,3 +1,5 @@
+
+
 import React, { createContext, useContext, useState, useEffect, type ReactNode, type FC } from 'react';
 import { initialDocument } from '../data/initialData';
 import type { ResumeStore, AppState, Document, DocumentType, ListSectionKeys, SectionKeys, Theme, CanvasBlock, ListItem } from '../types';
@@ -82,15 +84,41 @@ export const ResumeProvider: FC<{ children: ReactNode }> = ({ children }) => {
 
   const addListItem = (section: ListSectionKeys) => {
     updateActiveDocument(doc => {
-      let newItem;
+      const uniqueId = `${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      let newItem: ListItem;
       switch (section) {
-        case 'skills': newItem = { id: Date.now().toString(), value: 'New Skill' }; break;
-        case 'achievements': newItem = { id: Date.now().toString(), description: '' }; break;
-        case 'hobbies': newItem = { id: Date.now().toString(), name: '' }; break;
-        case 'languages': newItem = { id: Date.now().toString(), name: '', proficiency: 'Basic' }; break;
-        default: newItem = { id: Date.now().toString(), company: '', role: '', startDate: '', endDate: '', description: '', institution: '', degree: '', gpa: '', name: '', link: '', issuer: '', date: '' }; break;
+        case 'experience':
+          newItem = { id: uniqueId, company: '', role: '', startDate: '', endDate: '', description: '' };
+          break;
+        case 'education':
+          newItem = { id: uniqueId, institution: '', degree: '', startDate: '', endDate: '', gpa: '' };
+          break;
+        case 'projects':
+          newItem = { id: uniqueId, name: '', description: '', link: '' };
+          break;
+        case 'skills':
+          newItem = { id: uniqueId, value: 'New Skill' };
+          break;
+        case 'certificates':
+          newItem = { id: uniqueId, name: '', issuer: '', date: '' };
+          break;
+        case 'achievements':
+          newItem = { id: uniqueId, description: '' };
+          break;
+        case 'languages':
+          newItem = { id: uniqueId, name: '', proficiency: 'Basic' };
+          break;
+        case 'hobbies':
+          newItem = { id: uniqueId, name: '' };
+          break;
+        default:
+          // This should never be reached if all list section keys are handled.
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const _exhaustiveCheck: never = section;
+          return;
       }
-      // @ts-ignore
+      // @ts-ignore - This is tricky to type correctly with discriminated unions on keys.
+      // We are ensuring the correct object type is pushed to the correct array.
       doc.data[section].push(newItem);
     });
   };

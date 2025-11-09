@@ -1,13 +1,14 @@
-
 import React, { type FC, type SVGProps } from 'react';
 import { useResumeStore } from '../hooks/useResumeStore';
 import type { Document } from '../types';
+// FIX: Import Variants type from framer-motion to correctly type animation variants.
 import { motion, type Variants } from 'framer-motion';
 
 interface DashboardProps {
     onSelectDocument: () => void;
 }
 
+// FIX: Explicitly type containerVariants with Variants to prevent type inference issues.
 const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -19,13 +20,14 @@ const containerVariants: Variants = {
     },
 };
 
+// FIX: Explicitly type itemVariants with Variants. This resolves the error where `type: "spring"` was inferred as `string` instead of a specific animation type.
 const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } },
 };
 
 
-const Dashboard: FC<DashboardProps> = ({ onSelectDocument }) => {
+const Dashboard = ({ onSelectDocument }: DashboardProps) => {
     const store = useResumeStore();
     
     const handleCreateNew = (type: 'resume' | 'cover-letter') => {
@@ -103,7 +105,7 @@ const Dashboard: FC<DashboardProps> = ({ onSelectDocument }) => {
     );
 };
 
-const NewDocumentCard: FC<{ title: string; description: string; icon: FC<SVGProps<SVGSVGElement>>; onClick: () => void;}> = ({ title, description, icon: Icon, onClick }) => (
+const NewDocumentCard = ({ title, description, icon: Icon, onClick }: { title: string; description: string; icon: FC<SVGProps<SVGSVGElement>>; onClick: () => void;}) => (
     <motion.button 
         onClick={onClick}
         whileHover={{ scale: 1.02, y: -5 }}
@@ -121,7 +123,7 @@ const NewDocumentCard: FC<{ title: string; description: string; icon: FC<SVGProp
     </motion.button>
 );
 
-const DocumentListItem: FC<{ doc: Document, onSelect: (id: string) => void, onDelete: (id: string) => void }> = ({ doc, onSelect, onDelete }) => (
+const DocumentListItem = ({ doc, onSelect, onDelete }: { doc: Document, onSelect: (id: string) => void, onDelete: (id: string) => void }) => (
     <motion.li variants={itemVariants} className="flex items-center justify-between p-4 bg-black/40 hover:bg-black/50 border border-[var(--border-color)] rounded-xl shadow-md transition-all hover:border-[var(--accent)]/50">
         <div className="flex items-center">
              <div className="mr-4 text-cyan-400">{doc.type === 'resume' ? <ResumeIcon className="w-6 h-6" /> : <CoverLetterIcon className="w-6 h-6" />}</div>
@@ -139,7 +141,7 @@ const DocumentListItem: FC<{ doc: Document, onSelect: (id: string) => void, onDe
     </motion.li>
 );
 
-const ResumeIcon: FC<SVGProps<SVGSVGElement>> = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
-const CoverLetterIcon: FC<SVGProps<SVGSVGElement>> = (props) => <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
+const ResumeIcon = (props: SVGProps<SVGSVGElement>) => <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>;
+const CoverLetterIcon = (props: SVGProps<SVGSVGElement>) => <svg {...props} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>;
 
 export default Dashboard;

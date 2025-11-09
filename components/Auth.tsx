@@ -1,12 +1,12 @@
 
-import React, { useState, type FC, type FormEvent } from 'react';
+import React, { useState, type FormEvent } from 'react';
 import { motion } from 'framer-motion';
 
 interface AuthProps {
   onLoginSuccess: () => void;
 }
 
-const Auth: FC<AuthProps> = ({ onLoginSuccess }) => {
+const Auth = ({ onLoginSuccess }: AuthProps) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);

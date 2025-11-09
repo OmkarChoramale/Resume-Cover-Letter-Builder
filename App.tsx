@@ -1,5 +1,5 @@
 
-import React, { useState, type FC } from 'react';
+import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Preview from './components/Preview';
 import Auth from './components/Auth';
@@ -15,7 +15,7 @@ const viewVariants = {
   exit: { opacity: 0, scale: 0.98 },
 };
 
-const App: FC = () => {
+const App = () => {
   const [view, setView] = useState<View>('auth');
 
   const renderView = () => {
